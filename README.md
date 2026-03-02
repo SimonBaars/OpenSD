@@ -68,3 +68,35 @@
 - UpCodes has the most developer-friendly interface for code lookups.
 - Building permit data may also appear in the Open Data Portal (see above).
 - For permit status lookups, the city uses the **OpenDSD** system at [opendsd.sandiego.gov](https://opendsd.sandiego.gov).
+
+---
+
+## Inspiration
+
+Looking for project ideas? Here are some starting points:
+
+1. **Claude Connector for City Data** — Build a Claude-powered connector that enables easier access to San Diego's open data, letting users ask natural-language questions about city datasets (permits, budgets, traffic, etc.) and get structured answers.
+
+2. **MCP Server or CLI for City Data Querying** — Create an MCP server or command-line tool that wraps the Socrata/SODA API, making it easy to query, filter, and join San Diego open datasets without writing raw API calls.
+
+3. **Council Meeting Sentiment Analyzer** — Transcribe council meeting videos (via Whisper or similar) and use Claude to analyze how individual council members feel about specific issues, tracking positions over time.
+
+4. **Municipal Code Assistant** — A conversational tool that helps residents and developers navigate the San Diego Municipal Code — ask questions in plain English and get back relevant code sections with explanations.
+
+5. **Permit Navigator** — An interactive guide that walks users through the building permit process step by step, determining which permits they need based on their project description and surfacing relevant code requirements.
+
+6. **Neighborhood Issue Tracker** — Combine 311 data, code enforcement records, and police call data from the Open Data Portal to visualize and track quality-of-life issues by neighborhood over time.
+
+7. **Budget Explorer** — An interactive visualization of the City of San Diego's budget data that lets residents explore where money goes, compare departments, and track spending trends across fiscal years.
+
+8. **Public Records Request Assistant** — A tool that searches the 40,000+ records in NextRequest, helps users find existing requests related to their topic, and assists in drafting new records requests.
+
+9. **Council Agenda Summarizer** — Automatically pull upcoming council and committee agendas, summarize each item in plain language, and highlight items relevant to a user's neighborhood or interests.
+
+10. **Development Project Impact Analyzer** — Combine permit data, zoning codes, and council records to help residents understand proposed development projects in their area and their potential impact.
+
+11. **Historical Document Search** — Build a semantic search layer over the city's digital archives, making historical documents, photos, and audio files discoverable through natural-language queries.
+
+12. **Code Compliance Checker** — Given a property address or project description, cross-reference the building code, local amendments, and zoning regulations to flag potential compliance issues before a permit application.
+
+13. **Council Voting Pattern Dashboard** — Aggregate council voting records from meeting minutes and results to visualize voting patterns, alliances, and how representatives align on key policy areas.
