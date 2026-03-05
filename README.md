@@ -122,3 +122,87 @@ For other MCP clients (e.g. Claude Desktop), add to your `claude_desktop_config.
 Once added, you can submit your project directly through your MCP client using the tools provided by the `impact-lab-submissions` MCP server.
 
 **Note:** Only your most recent submission will be reviewed. You can resubmit as many times as you like, but each new submission replaces the previous one.
+
+---
+
+## Judging Criteria
+
+Each project will be scored across four categories on a **1-5 scale** (1 = minimal, 5 = exceptional), for a **maximum of 20 points**.
+
+---
+
+### 1. Civic Impact (1-5)
+
+Does this solve a real problem for San Diego residents, city staff, or the community?
+
+Judges should ask: **Would someone actually use this?**
+
+| Score | Description |
+|-------|-------------|
+| 5 | Addresses a clear, pressing civic need with a compelling use case |
+| 4 | Solves a real problem with a well-defined audience |
+| 3 | Useful concept, but the target user or problem could be sharper |
+| 2 | Loosely connected to a civic use case |
+| 1 | No clear civic relevance |
+
+> **Bonus consideration:** Solutions that enable broader access -- such as MCP servers, reusable APIs, or agentic tools that others can build on -- should be rewarded.
+
+---
+
+### 2. Use of City Data (1-5)
+
+How effectively does the project leverage San Diego's open data, municipal code, council records, or other city resources?
+
+| Score | Description |
+|-------|-------------|
+| 5 | Deeply integrates multiple city data sources in a meaningful way |
+| 4 | Strong use of at least one city data source with clear value |
+| 3 | Uses city data, but doesn't go beyond surface-level access |
+| 2 | Minimal or superficial use of city data |
+| 1 | No meaningful use of city data |
+
+> **Bonus consideration:** Projects that creatively combine datasets (e.g., joining permit data with zoning codes, enriching 311 data with budget info) should be rewarded.
+
+---
+
+### 3. Technical Execution (1-5)
+
+Does it work? Is the demo functional and reasonably polished for a hackathon timeframe?
+
+| Score | Description |
+|-------|-------------|
+| 5 | Fully functional, polished, and well-scoped for the time available |
+| 4 | Working demo with minor rough edges |
+| 3 | Core functionality works but notable gaps or bugs |
+| 2 | Partially working; significant issues during demo |
+| 1 | Non-functional or unable to demo |
+
+> A focused, working MVP beats an ambitious idea that crashes during the demo. Judges should reward smart scoping.
+
+---
+
+### 4. Presentation & Story (1-5)
+
+Did the team clearly communicate what they built, why it matters, and who it's for?
+
+| Score | Description |
+|-------|-------------|
+| 5 | Compelling narrative, clear demo, and strong delivery |
+| 4 | Well-structured presentation with a clear problem/solution arc |
+| 3 | Adequate presentation but missing clarity on problem, audience, or impact |
+| 2 | Disorganized or hard to follow |
+| 1 | No clear communication of the project's purpose |
+
+> A strong demo tells a story: here's the problem, here's how we solve it, here's what it looks like in action.
+
+---
+
+### Scoring Summary
+
+| Category | Max Score |
+|----------|-----------|
+| Civic Impact | 5 |
+| Use of City Data | 5 |
+| Technical Execution | 5 |
+| Presentation & Story | 5 |
+| **Total** | **20** |
