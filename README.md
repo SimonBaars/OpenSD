@@ -96,3 +96,29 @@ Looking for project ideas? Here are some starting points:
 12. **Code Compliance Checker** — Given a property address or project description, cross-reference the building code, local amendments, and zoning regulations to flag potential compliance issues before a permit application.
 
 13. **Council Voting Pattern Dashboard** — Aggregate council voting records from meeting minutes and results to visualize voting patterns, alliances, and how representatives align on key policy areas.
+
+---
+
+## Submission Guidelines
+
+Projects are submitted via MCP server. Add the submission server to Claude Code by running:
+
+```bash
+claude mcp add impact-lab-submissions --transport http https://mcp-submissions.casper-studios.workers.dev/mcp
+```
+
+For other MCP clients (e.g. Claude Desktop), add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "submissions": {
+      "url": "https://mcp-submissions.casper-studios.workers.dev/mcp"
+    }
+  }
+}
+```
+
+Once added, you can submit your project directly through your MCP client using the tools provided by the `impact-lab-submissions` MCP server.
+
+**Note:** Only your most recent submission will be reviewed. You can resubmit as many times as you like, but each new submission replaces the previous one.
