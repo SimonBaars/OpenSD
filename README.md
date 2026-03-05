@@ -91,6 +91,16 @@ Once added, you can submit your project directly through your MCP client using t
 
 ---
 
+## Rules
+
+- **No early starts.** Your first commit must be after 10:30 AM on 3/7. Projects with evidence of development before that time will be disqualified.
+- **Original work only.** Third-party libraries and frameworks are fine, but the core project must be built during the hackathon. No pre-existing projects.
+- **One submission per team.** Each team submits one project via the MCP submission server.
+- **Use city data responsibly.** Use public APIs and open data. Do not scrape or abuse city systems.
+- **Code must be in a public GitHub repo.** Judges need to be able to review your code. You're free to make the repo private after the hackathon closes.
+
+---
+
 ## Judging Criteria
 
 Each project will be scored across four categories on a **1-5 scale** (1 = minimal, 5 = exceptional), for a **maximum of 20 points**.
