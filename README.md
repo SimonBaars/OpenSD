@@ -145,7 +145,7 @@ Judges should ask: **Would someone actually use this?**
 | 2 | Loosely connected to a civic use case |
 | 1 | No clear civic relevance |
 
-> **Bonus consideration:** Solutions that enable broader access -- such as MCP servers, reusable APIs, or agentic tools that others can build on -- should be rewarded.
+> **Bonus consideration:** Solutions that enable broader access -- such as MCP servers, CLIs, or agentic tools that others can build on -- should be rewarded.
 
 ---
 
