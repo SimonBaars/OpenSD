@@ -154,10 +154,10 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-white leading-tight">
-                San Diego Civic Data Explorer
+                OpenSD
               </h1>
               <p className="text-xs text-slate-400">
-                109 datasets + council voting records · AI-powered analysis
+                San Diego's open data, explored by AI
               </p>
             </div>
           </div>

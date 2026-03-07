@@ -1,4 +1,4 @@
-"""FastAPI server for San Diego Civic Data Explorer."""
+"""FastAPI server for OpenSD."""
 
 import json
 from pathlib import Path
@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from agent import SanDiegoAgent
 
-app = FastAPI(title="San Diego Civic Data Explorer")
+app = FastAPI(title="OpenSD")
 
 app.add_middleware(
     CORSMiddleware,

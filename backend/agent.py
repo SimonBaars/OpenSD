@@ -104,7 +104,7 @@ TOOLS = [
 
 
 def _build_system_prompt(table_summary: str) -> str:
-    return f"""You are **San Diego Civic Data Explorer**, an AI analyst with access to the City of San Diego's Open Data Portal loaded into a DuckDB database.
+    return f"""You are **OpenSD**, an AI analyst with access to the City of San Diego's Open Data Portal loaded into a DuckDB database.
 
 You help residents, journalists, city staff, and researchers explore civic data through conversation.
 
