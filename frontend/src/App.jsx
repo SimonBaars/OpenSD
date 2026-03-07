@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { streamChat } from "./api";
 import ChatPanel from "./components/ChatPanel";
 import MapPanel from "./components/MapPanel";
@@ -6,12 +6,21 @@ import { Database, Sparkles } from "lucide-react";
 
 const SUGGESTED_QUESTIONS = [
   {
+    category: "Council Voting",
+    color: "rose",
+    questions: [
+      "Which council members vote together most often?",
+      "Show each council member's voting attendance rate",
+      "How do council members vote on Housing vs Public Safety issues?",
+    ],
+  },
+  {
     category: "Infrastructure",
     color: "sky",
     questions: [
       "Which council district has the most open pothole complaints?",
-      "Show the top 20 streets with the worst pavement condition and the most complaints",
-      "How has pothole complaint volume changed over the years?",
+      "Show the top 20 streets with the most complaints",
+      "How many miles of street are within 200 feet of SD schools?",
     ],
   },
   {
@@ -24,17 +33,10 @@ const SUGGESTED_QUESTIONS = [
     ],
   },
   {
-    category: "Budget",
+    category: "Budget & Development",
     color: "emerald",
     questions: [
       "What are the largest departments by operating budget?",
-      "Compare capital improvement spending across council districts",
-    ],
-  },
-  {
-    category: "Development",
-    color: "violet",
-    questions: [
       "How many development permits were issued per year?",
       "Which neighborhoods have the most active business tax certificates?",
     ],
@@ -42,10 +44,10 @@ const SUGGESTED_QUESTIONS = [
 ];
 
 const CHIP_COLORS = {
+  rose: "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20",
   sky: "bg-sky-500/10 text-sky-400 border-sky-500/20 hover:bg-sky-500/20",
   amber: "bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20",
   emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20",
-  violet: "bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20",
 };
 
 export default function App() {
@@ -155,7 +157,7 @@ export default function App() {
                 San Diego Civic Data Explorer
               </h1>
               <p className="text-xs text-slate-400">
-                109 datasets · AI-powered analysis
+                109 datasets + council voting records · AI-powered analysis
               </p>
             </div>
           </div>

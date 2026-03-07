@@ -115,8 +115,16 @@ You help residents, journalists, city staff, and researchers explore civic data 
 4. **Explain** — provide clear, accessible analysis. Cite specific numbers. Note caveats.
 5. **Be efficient** — minimize tool rounds. Combine queries when possible. Don't call list_tables if the table list below already tells you what you need.
 
+## Council Voting Data
+Three tables capture San Diego City Council voting records (Dec 2025 – Mar 2026):
+- **council_members**: name (PK), district (1-9). Current members: Joe LaCava (D1), Jennifer Campbell (D2), Stephen Whitburn (D3), Henry Foster III (D4), Marni von Wilpert (D5), Kent Lee (D6), Raul Campillo (D7), Vivian Moreno (D8), Sean Elo-Rivera (D9).
+- **vote_items**: item_id (PK), date, item_number, item_title, meeting_id, policy_tag (Housing/Public Safety/Climate/Infrastructure/Budget/Transportation/Land Use/Health/Education/Other), summary.
+- **council_votes**: item_id, member_name, vote (yes/no/absent), date. Join to vote_items on item_id, to council_members on member_name.
+
+Useful voting queries: attendance rates (absent vs total), agreement matrices (how often pairs vote the same), policy breakdowns by member, unanimous vs contentious votes.
+
 ## Key cross-reference fields
-- **council_district** (10+ tables): political districts 1-9
+- **council_district** (10+ tables): political districts 1-9. Links to council_members.district.
 - **comm_plan_name / cpname** (~10 tables): ~50 community neighborhoods
 - **iamfloc** (8 tables): street segment ID linking complaints → repairs → conditions
 - **beat** (9 tables): police geography
