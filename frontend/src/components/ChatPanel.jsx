@@ -26,8 +26,8 @@ export default function ChatPanel({ messages, isLoading, onSend }) {
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
-            <p className="text-slate-500 text-sm">
-              Select a question above or type your own below
+            <p className="text-slate-500 text-sm text-center px-4">
+              Pick a question above or ask your own below
             </p>
           </div>
         )}

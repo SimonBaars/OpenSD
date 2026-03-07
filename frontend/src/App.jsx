@@ -2,43 +2,67 @@ import React, { useState, useCallback } from "react";
 import { streamChat } from "./api";
 import ChatPanel from "./components/ChatPanel";
 import MapPanel from "./components/MapPanel";
-import { Database, Sparkles, Map, X } from "lucide-react";
+import { Database, Sparkles, Map, X, Lightbulb, ChevronDown } from "lucide-react";
 
 const SUGGESTED_QUESTIONS = [
   {
     category: "Council Voting",
     color: "rose",
     questions: [
-      "Which council members vote together most often?",
+      "Which council members vote together most often? Show an alliance matrix",
       "Show each council member's voting attendance rate",
-      "How do council members vote on Housing vs Public Safety issues?",
+      "Who are the most contentious council members? Show the split votes",
+      "What items has Raul Campillo voted 'no' on?",
     ],
   },
   {
-    category: "Infrastructure",
+    category: "Neighborhood Issues",
     color: "sky",
     questions: [
       "Which council district has the most open pothole complaints?",
-      "Show the top 20 streets with the most complaints",
-      "How many miles of street are within 200 feet of SD schools?",
+      "Show Get It Done complaints by type on a map for District 3",
+      "Compare 311 complaint trends over the last 5 years by category",
+      "Which neighborhoods have the most code enforcement cases?",
     ],
   },
   {
-    category: "Safety",
+    category: "Public Safety",
     color: "amber",
     questions: [
       "Compare police calls for service across council districts",
-      "What are the most common types of Get It Done 311 reports?",
-      "Show fire incident counts by community planning area",
+      "What are the most dangerous intersections for traffic collisions?",
+      "Show fire incident response times by station",
+      "How have crime rates changed by neighborhood over the past 3 years?",
     ],
   },
   {
-    category: "Budget & Development",
+    category: "Budget & Spending",
     color: "emerald",
     questions: [
       "What are the largest departments by operating budget?",
+      "Compare capital improvement spending across council districts",
+      "How has the city budget changed over the past 5 fiscal years?",
+      "Show the top 10 capital projects by total spending",
+    ],
+  },
+  {
+    category: "Development & Land Use",
+    color: "violet",
+    questions: [
       "How many development permits were issued per year?",
       "Which neighborhoods have the most active business tax certificates?",
+      "Show the distribution of general plan land use types across the city",
+      "Where are the most parking citations issued? Show on a map",
+    ],
+  },
+  {
+    category: "Cross-Dataset Analysis",
+    color: "cyan",
+    questions: [
+      "How many miles of street are within 200 feet of SD schools?",
+      "Do districts with more pothole complaints also have higher budgets?",
+      "Compare council voting patterns with Get It Done complaints in their districts",
+      "Which communities have the most parks per capita?",
     ],
   },
 ];
@@ -50,7 +74,60 @@ const CHIP_COLORS = {
     "bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20",
   emerald:
     "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20",
+  violet:
+    "bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20",
+  cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20",
 };
+
+function SuggestedQuestions({ onSelect, isLoading, collapsed, onToggle }) {
+  return (
+    <div className="flex-none border-b border-slate-700/30">
+      {collapsed ? (
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-800/30 transition-colors"
+        >
+          <Lightbulb className="w-3.5 h-3.5" />
+          Suggested questions
+          <ChevronDown className="w-3 h-3" />
+        </button>
+      ) : (
+        <div className="p-4 overflow-y-auto max-h-[55vh] sm:max-h-[45%]">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-400">
+              Ask anything about San Diego civic data:
+            </p>
+            <button
+              onClick={onToggle}
+              className="text-xs text-slate-500 hover:text-slate-300 px-2 py-1 rounded transition-colors"
+            >
+              hide
+            </button>
+          </div>
+          {SUGGESTED_QUESTIONS.map((group) => (
+            <div key={group.category} className="mb-3">
+              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                {group.category}
+              </span>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {group.questions.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => !isLoading && onSelect(q)}
+                    disabled={isLoading}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${CHIP_COLORS[group.color]}`}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -58,12 +135,15 @@ export default function App() {
   const [mapChoropleths, setMapChoropleths] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showMapPanel, setShowMapPanel] = useState(false);
+  const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false);
 
   const hasMapData = mapLayers.length > 0 || mapChoropleths.length > 0;
 
   const handleSend = useCallback(
     async (text) => {
       if (!text.trim() || isLoading) return;
+
+      setSuggestionsCollapsed(true);
 
       const userMsg = { role: "user", content: text };
       setMessages((prev) => [...prev, userMsg]);
@@ -161,8 +241,6 @@ export default function App() {
     [messages, isLoading],
   );
 
-  const showSuggestions = messages.length === 0;
-
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -205,7 +283,7 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex-1 flex min-h-0 relative">
-        {/* Map panel - desktop: side panel when data exists; mobile: overlay */}
+        {/* Map panel */}
         {hasMapData && (
           <div
             className={`${
@@ -222,44 +300,22 @@ export default function App() {
                 Back to chat
               </button>
             </div>
-            <MapPanel
-              layers={mapLayers}
-              choropleths={mapChoropleths}
-            />
+            <MapPanel layers={mapLayers} choropleths={mapChoropleths} />
           </div>
         )}
 
-        {/* Chat panel - full width on mobile, or when no map data on desktop */}
+        {/* Chat panel */}
         <div
           className={`flex flex-col min-h-0 w-full ${
             hasMapData ? "sm:w-[45%]" : ""
           }`}
         >
-          {showSuggestions && (
-            <div className="flex-none p-4 border-b border-slate-700/30 overflow-y-auto max-h-[55vh] sm:max-h-[45%]">
-              <p className="text-sm text-slate-400 mb-3">
-                Ask anything about San Diego civic data:
-              </p>
-              {SUGGESTED_QUESTIONS.map((group) => (
-                <div key={group.category} className="mb-3">
-                  <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    {group.category}
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 mt-1.5">
-                    {group.questions.map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => handleSend(q)}
-                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${CHIP_COLORS[group.color]}`}
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <SuggestedQuestions
+            onSelect={handleSend}
+            isLoading={isLoading}
+            collapsed={suggestionsCollapsed}
+            onToggle={() => setSuggestionsCollapsed((v) => !v)}
+          />
 
           <ChatPanel
             messages={messages}
