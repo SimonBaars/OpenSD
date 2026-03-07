@@ -10,8 +10,10 @@ An AI-powered civic data explorer that lets anyone query, visualize, and cross-r
 
 ## Team
 
-- **Simon** — full-stack development, data pipeline, deployment
-- **Max** — project ideation, data sourcing
+- **Nathan** — vibes
+- **Simon** — more vibes
+- **Ari** — domain knowledge and more vibes
+- **Amin** — superior vibes
 
 ---
 
@@ -134,4 +136,4 @@ The app is deployed on a Linode (Ubuntu 24.04) at [opensd.app](https://opensd.ap
 ## Links
 
 - **Live app**: [https://opensd.app](https://opensd.app)
-- **Repository**: [github.com/SimonBaars/opensd](https://github.com/your-repo)
+- **Repository**: [github.com/SimonBaars/opensd](https://github.com/SimonBaars/opensd)
