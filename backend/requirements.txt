@@ -1,0 +1,6 @@
+pdfplumber>=0.11
+fastapi>=0.135
+uvicorn>=0.41
+anthropic>=0.84
+aiosqlite>=0.22
+python-multipart>=0.0.22
