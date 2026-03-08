@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "impact-lab-submissions": {
+      "url": "https://mcp-submissions.casper-studios.workers.dev/mcp"
+    }
+  }
+}
