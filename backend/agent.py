@@ -77,7 +77,10 @@ TOOLS = [
             "- map_points: points on a map. Each object needs lat/lng. Use color_key to "
             "color points by a category field, size_key to scale radius by a numeric field.\n"
             "- choropleth: colors council districts by value. Data should have a 'district' "
-            "field (1-9) and a numeric 'value' field. Great for per-district comparisons."
+            "field (1-9) and a numeric 'value' field. Great for per-district comparisons.\n\n"
+            "IMPORTANT: For map_points and table with many rows (>50), use `sql` instead of `data` "
+            "to avoid token limits. The backend will execute the SQL and attach the results directly. "
+            "You can still pass `data` for small datasets (charts, choropleths)."
         ),
         "input_schema": {
             "type": "object",
@@ -90,7 +93,11 @@ TOOLS = [
                 "data": {
                     "type": "array",
                     "items": {"type": "object"},
-                    "description": "Array of data objects",
+                    "description": "Array of data objects (for small datasets: charts, choropleths)",
+                },
+                "sql": {
+                    "type": "string",
+                    "description": "SQL query to execute for the visualization data. Use INSTEAD of data for large results (map_points, big tables). The backend runs this query and attaches the results.",
                 },
                 "x_key": {"type": "string", "description": "Key for x-axis / categories"},
                 "y_keys": {
@@ -105,7 +112,7 @@ TOOLS = [
                 "size_key": {"type": "string", "description": "Numeric field to scale point radius (map_points)"},
                 "value_key": {"type": "string", "description": "Numeric field for choropleth coloring"},
             },
-            "required": ["type", "title", "data"],
+            "required": ["type", "title"],
         },
     },
 ]
@@ -119,7 +126,7 @@ You help residents, journalists, city staff, and researchers explore civic data 
 ## How to respond
 1. **Go straight to querying** — the full table schema is below; you rarely need list_tables/describe_table. Use them only if you need sample values or aren't sure about data content.
 2. **Query precisely** — write efficient SQL. Always LIMIT exploratory queries. Aggregate for summaries.
-3. **Visualize** — call create_visualization for comparisons (bar_chart), trends (line_chart), geographic data (map_points), or detailed breakdowns (table).
+3. **Visualize** — call create_visualization for comparisons (bar_chart), trends (line_chart), geographic data (map_points), or detailed breakdowns (table). For map_points and large tables, pass a `sql` query instead of inline `data` — the backend executes it directly. Only embed `data` inline for small datasets (<50 rows) like charts and choropleths.
 4. **Explain** — provide clear, accessible analysis. Cite specific numbers. Note caveats.
 5. **Be efficient** — minimize tool rounds. Combine queries when possible. Don't call list_tables if the table list below already tells you what you need.
 
@@ -251,7 +258,7 @@ class SanDiegoAgent:
         log.info("Tool call: %s  input: %s", name, json.dumps(input_data, default=str)[:500])
         if name == "query_data":
             result = self._exec_query(input_data["sql"], input_data.get("limit", 200))
-            log.info("  -> %d rows returned", len(result.get("rows", [])))
+            log.info("  -> %d rows returned", len(result.get("data", [])))
             return json.dumps(result, default=str)
 
         if name == "list_tables":
@@ -264,19 +271,28 @@ class SanDiegoAgent:
             return json.dumps(result, default=str)
 
         if name == "create_visualization":
+            data = input_data.get("data", [])
+            viz_sql = input_data.get("sql")
+            if viz_sql and not data:
+                query_result = self._exec_query(viz_sql, limit=5000)
+                if "error" in query_result:
+                    return json.dumps({"error": f"Visualization SQL failed: {query_result['error']}"})
+                data = query_result.get("data", [])
+                log.info("  viz sql returned %d rows", len(data))
+
             artifact = {
                 "id": f"viz_{len(artifacts)}",
                 "type": input_data["type"],
                 "title": input_data.get("title", ""),
-                "data": input_data.get("data", []),
+                "data": data,
                 "config": {
                     k: v
                     for k, v in input_data.items()
-                    if k not in ("type", "title", "data")
+                    if k not in ("type", "title", "data", "sql")
                 },
             }
             artifacts.append(artifact)
-            return json.dumps({"status": "ok", "artifact_id": artifact["id"]})
+            return json.dumps({"status": "ok", "artifact_id": artifact["id"], "row_count": len(data)})
 
         return json.dumps({"error": f"Unknown tool: {name}"})
 
@@ -306,15 +322,19 @@ class SanDiegoAgent:
 
             response = self.client.messages.create(
                 model=MODEL,
-                max_tokens=4096,
+                max_tokens=16384,
                 system=system,
                 tools=TOOLS,
                 messages=messages,
             )
 
+            log.info("stop_reason=%s, blocks=%d", response.stop_reason, len(response.content))
+
             if response.stop_reason == "tool_use":
                 tool_results = []
                 for block in response.content:
+                    if hasattr(block, "text") and block.text.strip():
+                        yield {"type": "text", "text": block.text}
                     if block.type == "tool_use":
                         yield {
                             "type": "tool_call",
@@ -342,6 +362,17 @@ class SanDiegoAgent:
 
                 messages.append({"role": "assistant", "content": response.content})
                 messages.append({"role": "user", "content": tool_results})
+
+            elif response.stop_reason == "max_tokens":
+                text = ""
+                for block in response.content:
+                    if hasattr(block, "text"):
+                        text += block.text
+                if text.strip():
+                    yield {"type": "text", "text": text}
+                log.warning("Response truncated at max_tokens, continuing...")
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": "Your response was truncated. Please continue — if you were about to create a visualization, use the `sql` parameter instead of embedding data."})
 
             else:
                 text = ""

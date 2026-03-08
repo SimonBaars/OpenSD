@@ -1,5 +1,13 @@
 const API_BASE = "/api";
 
+class StreamDroppedError extends Error {
+  constructor() {
+    super("Connection lost — the server is still processing. Please try again.");
+    this.name = "StreamDroppedError";
+    this.retryable = true;
+  }
+}
+
 export async function* streamChat(message, history) {
   const response = await fetch(`${API_BASE}/chat`, {
     method: "POST",
@@ -14,24 +22,36 @@ export async function* streamChat(message, history) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let receivedDone = false;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
 
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        try {
-          yield JSON.parse(line.slice(6));
-        } catch {
-          // skip malformed events
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const event = JSON.parse(line.slice(6));
+            if (event.type === "done") receivedDone = true;
+            yield event;
+          } catch {
+            // skip malformed events
+          }
         }
       }
     }
+  } catch (err) {
+    if (!receivedDone) throw new StreamDroppedError();
+    throw err;
+  }
+
+  if (!receivedDone) {
+    throw new StreamDroppedError();
   }
 }
 

@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { User, Bot, Loader2, Database } from "lucide-react";
+import { User, Bot, Loader2, Database, RefreshCw } from "lucide-react";
 import ChartWidget from "./ChartWidget";
 import TableWidget from "./TableWidget";
 import InlineMap from "./InlineMap";
@@ -54,7 +54,7 @@ function ArtifactRenderer({ artifact }) {
   return null;
 }
 
-export default function MessageBubble({ message }) {
+export default function MessageBubble({ message, onRetry }) {
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -97,6 +97,16 @@ export default function MessageBubble({ message }) {
                 {message.content}
               </ReactMarkdown>
             </div>
+          )}
+
+          {message.retryable && onRetry && (
+            <button
+              onClick={() => onRetry(message.retryMessage)}
+              className="mt-2 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-sky-600/20 text-sky-400 hover:bg-sky-600/30 border border-sky-500/20 transition-colors"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Retry question
+            </button>
           )}
 
           {message.artifacts?.map((artifact) => (

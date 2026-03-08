@@ -1,11 +1,14 @@
 """FastAPI server for OpenSD."""
 
+import asyncio
 import json
 from pathlib import Path
+from queue import Queue, Empty
+from threading import Thread
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from agent import SanDiegoAgent
@@ -25,17 +28,50 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 agent = SanDiegoAgent()
 
 
+HEARTBEAT_INTERVAL = 10  # seconds between keepalive pings
+
+_SENTINEL = object()
+
+
 @app.post("/api/chat")
 async def chat(request: Request):
     body = await request.json()
     message = body.get("message", "")
     history = body.get("history", [])
 
-    def generate():
-        for event in agent.chat_stream(message, history):
+    async def generate():
+        q: Queue = Queue()
+
+        def _run():
+            try:
+                for event in agent.chat_stream(message, history):
+                    q.put(event)
+            except Exception as exc:
+                q.put({"type": "error", "text": str(exc)})
+            finally:
+                q.put(_SENTINEL)
+
+        thread = Thread(target=_run, daemon=True)
+        thread.start()
+
+        while True:
+            try:
+                event = await asyncio.to_thread(q.get, timeout=HEARTBEAT_INTERVAL)
+            except Empty:
+                yield ": heartbeat\n\n"
+                continue
+            if event is _SENTINEL:
+                break
             yield f"data: {json.dumps(event, default=str)}\n\n"
 
-    return StreamingResponse(generate(), media_type="text/event-stream")
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.get("/api/datasets")
@@ -84,6 +120,8 @@ if FRONTEND_DIR.exists():
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
+        if any(seg.startswith(".") for seg in full_path.split("/")):
+            return Response(status_code=404)
         file_path = FRONTEND_DIR / full_path
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)

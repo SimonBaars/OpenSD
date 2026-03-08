@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Loader2 } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 
-export default function ChatPanel({ messages, isLoading, onSend }) {
+export default function ChatPanel({ messages, isLoading, onSend, onRetry, compact }) {
   const [input, setInput] = useState("");
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -21,18 +21,11 @@ export default function ChatPanel({ messages, isLoading, onSend }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className={`${compact ? "flex-none" : "flex-1"} flex flex-col min-h-0`}>
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-slate-500 text-sm text-center px-4">
-              Pick a question above or ask your own below
-            </p>
-          </div>
-        )}
+      <div ref={scrollRef} className={`${messages.length === 0 ? "hidden" : "flex-1"} overflow-y-auto p-4 space-y-4`}>
         {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} />
+          <MessageBubble key={i} message={msg} onRetry={onRetry} />
         ))}
       </div>
 

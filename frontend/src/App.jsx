@@ -79,10 +79,10 @@ const CHIP_COLORS = {
   cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20",
 };
 
-function SuggestedQuestions({ onSelect, isLoading, collapsed, onToggle }) {
-  return (
-    <div className="flex-none border-b border-slate-700/30">
-      {collapsed ? (
+function SuggestedQuestions({ onSelect, isLoading, collapsed, onToggle, expand }) {
+  if (collapsed) {
+    return (
+      <div className="flex-none border-b border-slate-700/30">
         <button
           onClick={onToggle}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-800/30 transition-colors"
@@ -91,39 +91,50 @@ function SuggestedQuestions({ onSelect, isLoading, collapsed, onToggle }) {
           Suggested questions
           <ChevronDown className="w-3 h-3" />
         </button>
-      ) : (
-        <div className="p-4 overflow-y-auto max-h-[55vh] sm:max-h-[45%]">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm text-slate-400">
-              Ask anything about San Diego civic data:
-            </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${expand ? "flex-1 min-h-0 relative" : "flex-none"} border-b border-slate-700/30`}>
+      <div className={`p-4 ${expand ? "h-full overflow-y-auto pb-8" : "max-h-[45vh] overflow-y-auto"}`}>
+        <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm text-slate-400">
+            Ask anything about San Diego civic data:
+          </p>
+          {!expand && (
             <button
               onClick={onToggle}
               className="text-xs text-slate-500 hover:text-slate-300 px-2 py-1 rounded transition-colors"
             >
               hide
             </button>
-          </div>
-          {SUGGESTED_QUESTIONS.map((group) => (
-            <div key={group.category} className="mb-3">
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                {group.category}
-              </span>
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {group.questions.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => !isLoading && onSelect(q)}
-                    disabled={isLoading}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${CHIP_COLORS[group.color]}`}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          )}
         </div>
+        {SUGGESTED_QUESTIONS.map((group) => (
+          <div key={group.category} className="mb-3">
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              {group.category}
+            </span>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {group.questions.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => !isLoading && onSelect(q)}
+                  disabled={isLoading}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${CHIP_COLORS[group.color]}`}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+        </div>
+      </div>
+      {expand && (
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0c1222] to-transparent pointer-events-none" />
       )}
     </div>
   );
@@ -200,7 +211,6 @@ export default function App() {
                         config: a.config,
                       },
                     ]);
-                    setShowMapPanel(true);
                   }
                   if (a.type === "choropleth") {
                     setMapChoropleths((prev) => [
@@ -212,7 +222,6 @@ export default function App() {
                         config: a.config,
                       },
                     ]);
-                    setShowMapPanel(true);
                   }
                 }
                 break;
@@ -229,8 +238,12 @@ export default function App() {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            content: `Error: ${err.message}`,
+            content: err.retryable
+              ? "Connection lost while the server was still working on your question."
+              : `Error: ${err.message}`,
             status: "",
+            retryable: !!err.retryable,
+            retryMessage: text,
           };
           return updated;
         });
@@ -263,14 +276,14 @@ export default function App() {
             {hasMapData && (
               <button
                 onClick={() => setShowMapPanel((v) => !v)}
-                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors sm:hidden ${
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                   showMapPanel
                     ? "bg-sky-500/20 border-sky-500/30 text-sky-300"
                     : "bg-slate-800/80 border-slate-600/50 text-slate-400"
                 }`}
               >
                 <Map className="w-3.5 h-3.5" />
-                Map
+                {showMapPanel ? "Hide map" : "Show map"}
               </button>
             )}
             <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -283,13 +296,11 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex-1 flex min-h-0 relative">
-        {/* Map panel */}
-        {hasMapData && (
+        {/* Map panel — shown only when user toggles it on */}
+        {hasMapData && showMapPanel && (
           <div
-            className={`${
-              showMapPanel ? "flex" : "hidden"
-            } sm:flex flex-col border-r border-slate-700/50
-            absolute inset-0 z-20 sm:relative sm:z-auto sm:w-[55%]`}
+            className="flex flex-col border-r border-slate-700/50
+            absolute inset-0 z-20 sm:relative sm:z-auto sm:w-[55%]"
           >
             <div className="sm:hidden absolute top-3 left-3 z-[1001]">
               <button
@@ -307,7 +318,7 @@ export default function App() {
         {/* Chat panel */}
         <div
           className={`flex flex-col min-h-0 w-full ${
-            hasMapData ? "sm:w-[45%]" : ""
+            hasMapData && showMapPanel ? "sm:w-[45%]" : ""
           }`}
         >
           <SuggestedQuestions
@@ -315,12 +326,15 @@ export default function App() {
             isLoading={isLoading}
             collapsed={suggestionsCollapsed}
             onToggle={() => setSuggestionsCollapsed((v) => !v)}
+            expand={messages.length === 0}
           />
 
           <ChatPanel
             messages={messages}
             isLoading={isLoading}
             onSend={handleSend}
+            onRetry={handleSend}
+            compact={messages.length === 0}
           />
         </div>
       </div>
